@@ -254,65 +254,71 @@ def templates():
 @app.route('/template/<template_id>', methods=['GET', 'PUT', 'DELETE'])
 @token_required
 def get_template(template_id):
-    # TODO: wrap in try excetp block
-    if template_id:
-        if request.method == 'GET':
-            # get particular template
-            template = db.templates.find_one({"_id": ObjectId(template_id)})
-            if not template:
-                return Response(response=json.dumps({'info': 'Invalid template id'}),
-                                status=400,
+    try:
+        if template_id:
+            if request.method == 'GET':
+                # get particular template
+                template = db.templates.find_one({"_id": ObjectId(template_id)})
+                if not template:
+                    return Response(response=json.dumps({'info': 'Invalid template id'}),
+                                    status=400,
+                                    mimetype='application/json')
+
+                print("template:", template)
+                template['_id'] = str(template['_id'])
+                return Response(response=json.dumps(template),
+                                status=200,
                                 mimetype='application/json')
 
-            print("template:", template)
-            template['_id'] = str(template['_id'])
-            return Response(response=json.dumps(template),
-                            status=200,
-                            mimetype='application/json')
+            elif request.method == 'PUT':
+                # updating a template
+                # TODO: Validate the request data
+                set_data = {
+                    'template_name': request.form['template_name'],
+                    'subject': request.form['subject'],
+                    'body': request.form['body']
+                }
+                dbResponse = db.templates.find_one_and_update({'_id': ObjectId(template_id)},
+                                                              {"$set": set_data})
+                if not dbResponse:
+                    return Response(response=json.dumps({'info': 'Invalid template id'}),
+                                    status=400,
+                                    mimetype='application/json')
 
-        elif request.method == 'PUT':
-            # updating a template
-            # TODO: Validate the request data
-            set_data = {
-                'template_name': request.form['template_name'],
-                'subject': request.form['subject'],
-                'body': request.form['body']
-            }
-            dbResponse = db.templates.find_one_and_update({'_id': ObjectId(template_id)},
-                                                          {"$set": set_data})
-            if not dbResponse:
-                return Response(response=json.dumps({'info': 'Invalid template id'}),
-                                status=400,
-                                mimetype='application/json')
-
-            print("dbResponse:", dbResponse)
-            dbResponse['_id'] = str(dbResponse['_id'])
-            dbResponse['info'] = 'Updated template successfully'
-            return Response(response=json.dumps(dbResponse),
-                            status=202,
-                            mimetype='application/json')
-
-        elif request.method == 'DELETE':
-            # deleting a template
-
-            dbResponse = db.templates.delete_one(
-                {"_id": ObjectId(template_id)}
-            )
-
-            if dbResponse.deleted_count == 1:
-                return Response(response=json.dumps({'info': 'Template deleted successfully'}),
-                                status=202,
-                                mimetype='application/json')
-            else:
-                return Response(response=json.dumps({'info': 'Template already deleted or not found'}),
+                print("dbResponse:", dbResponse)
+                dbResponse['_id'] = str(dbResponse['_id'])
+                dbResponse['info'] = 'Updated template successfully'
+                return Response(response=json.dumps(dbResponse),
                                 status=202,
                                 mimetype='application/json')
 
-    # TODO: Check response codes
-    else:
-        # No template_id
-        return Response(response=json.dumps({'info': 'template_id not provided'}),
-                        status=400,
+            elif request.method == 'DELETE':
+                # deleting a template
+
+                dbResponse = db.templates.delete_one(
+                    {"_id": ObjectId(template_id)}
+                )
+
+                if dbResponse.deleted_count == 1:
+                    return Response(response=json.dumps({'info': 'Template deleted successfully'}),
+                                    status=202,
+                                    mimetype='application/json')
+                else:
+                    return Response(response=json.dumps({'info': 'Template already deleted or not found'}),
+                                    status=202,
+                                    mimetype='application/json')
+
+        # TODO: Check response codes
+        else:
+            # No template_id
+            return Response(response=json.dumps({'info': 'template_id not provided'}),
+                            status=400,
+                            mimetype='application/json')
+    except Exception as ex:
+        print("Exception: ", ex)
+        return Response(response=json.dumps({"Error": "An error occurred while getting template",
+                                             'info': f'{ex}'}),
+                        status=500,
                         mimetype='application/json')
 
 
@@ -320,8 +326,8 @@ def get_template(template_id):
 
 
 @app.route('/')
-def hello_world():  # put application's code here
-    return render_template('index.html')
+def home():  # just for test sake
+    return 'Hello'
 
 
 ######################################################################################
