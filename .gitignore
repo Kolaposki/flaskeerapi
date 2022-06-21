@@ -1,0 +1,12 @@
+# JetBrains PyCharm settings
+.idea/
+.idea
+__pycache__/*
+__pycache__*
+__pycache__
+workspace.xml
+
+# environment files
+.env
+.venv/
+venv/
