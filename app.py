@@ -19,12 +19,13 @@ CORS(app, resources={r"/*": {"origins": "*"}})  # to avoid cors error
 bcrypt = Bcrypt(app)
 DB_URL = config('DB_URL')
 
-if DEBUG:
-    mongodb_client = MongoClient(host="localhost", port=27017, serverSelectionTimeoutMS=1000)
-else:
-    mongodb_client = MongoClient(DB_URL)
-
 try:
+    if DEBUG:
+        mongodb_client = MongoClient(host="localhost", port=27017, serverSelectionTimeoutMS=1000)
+    else:
+        print("connecting to db")
+        mongodb_client = MongoClient(DB_URL)
+
     db = mongodb_client['templates']  # templates is the name of the db
     mongodb_client.server_info()  # trigger exception if it cant connect to db
 except Exception as e:
