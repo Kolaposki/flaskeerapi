@@ -9,7 +9,7 @@ Code is hosted on [Heroku](https://flaskeerapi.herokuapp.com/) and database at m
 ## Installation and Running the app
 
 - pip install -r requirements.txt
-- pyhton3 app.py
+- python3 app.py
 
 # REST API
 
